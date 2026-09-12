@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Изменить оценку — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Изменить оценку</h1>
+<p class="page-sub">Выберите день, в который проводился урок, чтобы внести изменения.</p>
+
+<div class="card" style="max-width:500px">
+  <form method="get" action="/teacher/edit_grades" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap">
+    <label class="f" style="margin:0; flex:1">
+      <span class="lbl">Дата урока</span>
+      <input type="date" name="day" value="{{ selected.isoformat() if selected else '' }}">
+    </label>
+    <button class="btn" type="submit" style="margin-bottom:14px">Показать</button>
+  </form>
+</div>
+
+{% if selected %}
+<div class="card">
+  <h3>Уроки {{ selected.strftime('%d.%m.%Y') }}</h3>
+  {% if lessons %}
+    {% for l in lessons %}
+    <a class="lesson-row" href="/teacher/edit_grades/lesson/{{ l.id }}" style="text-decoration:none; color:inherit">
+      <span class="num">{{ l.schedule_entry.lesson_number }}</span>
+      <span><strong>{{ l.schedule_entry.subject }}</strong></span>
+      <span class="muted">Группа: {{ l.schedule_entry.group.name }}</span>
+      <span class="muted">Кабинет: {{ l.schedule_entry.room or '—' }}</span>
+      <span class="btn ghost sm">Изменить</span>
+    </a>
+    {% endfor %}
+  {% else %}
+    <div class="empty"><div class="big">–</div>В этот день уроков нет</div>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

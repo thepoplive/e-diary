@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Настройка расписания звонков</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card" style="max-width:600px">
+    <h1>Расписание звонков</h1>
+    <p class="sub">Настройте расписание звонков: номер урока и время (начало — конец). Это потребуется один раз при первом входе.</p>
+    <form method="post" action="/setup/bells">
+      <div id="bell-rows"></div>
+      <button type="button" class="btn ghost" id="add-bell" style="margin-top:6px">+ Добавить ещё один урок</button>
+      <div class="actions" style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px">
+        <button class="btn success" type="submit" style="padding:11px 28px">Готово</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

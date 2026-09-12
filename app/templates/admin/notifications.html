@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Рассылка уведомлений — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Рассылка уведомлений</h1>
+<p class="page-sub">Отправьте сообщение учителям, ученикам и родителям. Максимум 3 закреплённых сообщения на пользователя.</p>
+
+{% if request.query_params.get('error') %}<div class="alert error">{{ request.query_params.get('error') }}</div>{% endif %}
+
+<div class="card">
+  <h3>Новое уведомление</h3>
+  <form method="post" action="/admin/notifications/send">
+    <label class="f"><span class="lbl">Тема</span>
+      <input type="text" name="topic" placeholder="Например: Родительское собрание" required>
+    </label>
+    <label class="f"><span class="lbl">Текст сообщения</span>
+      <textarea name="message" placeholder="Текст уведомления…" required></textarea>
+    </label>
+    <div class="muted small" style="margin-bottom:8px">Кому отправить:</div>
+    <div style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:16px">
+      <label style="display:flex; align-items:center; gap:6px"><input type="checkbox" name="targets" value="teacher" style="width:auto"> Учителям</label>
+      <label style="display:flex; align-items:center; gap:6px"><input type="checkbox" name="targets" value="student" style="width:auto"> Ученикам</label>
+      <label style="display:flex; align-items:center; gap:6px"><input type="checkbox" name="targets" value="parent" style="width:auto"> Родителям</label>
+    </div>
+    <button class="btn success" type="submit">Отправить</button>
+  </form>
+</div>
+
+{% set pinned = notifications | selectattr('id', 'in', pinned_notif_ids) | list %}
+{% if pinned %}
+<div class="card">
+  <h3>Закреплённые сообщения <span class="muted small">(для быстрого открепления)</span></h3>
+  {% for n in pinned %}
+  <div class="notif pinned">
+    <div class="head">
+      <span class="topic">{{ n.topic }}</span>
+      <span class="time">{{ n.created_at.strftime('%d.%m.%Y %H:%M') }} (МСК)</span>
+    </div>
+    <div class="body">{{ n.message[:120] }}{{ '…' if n.message|length > 120 }}</div>
+    <div class="small muted" style="margin-top:6px">
+      Кому: {{ n.targets|map(attribute='role')|map('replace', 'teacher', 'Учителям')|map('replace', 'student', 'Ученикам')|map('replace', 'parent', 'Родителям')|join(', ') }}
+    </div>
+    <div style="margin-top:10px">
+      <form method="post" action="/admin/notifications/unpin" style="display:inline">
+        <input type="hidden" name="notification_id" value="{{ n.id }}">
+        <button class="btn ghost sm">Открепить у всех</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="card">
+  <h3>Все уведомления <span class="muted small">({{ notifications|length }})</span></h3>
+  {% if notifications %}
+    {% for n in notifications %}
+    <div class="notif {{ 'pinned' if n.id in pinned_notif_ids }}">
+      <div class="head">
+        <span class="topic">{% if n.id in pinned_notif_ids %}<span class="pin-tag">Закреплено</span>{% endif %} {{ n.topic }}</span>
+        <span class="time">{{ n.created_at.strftime('%d.%m.%Y %H:%M') }} (МСК)</span>
+      </div>
+      <div class="body">{{ n.message }}</div>
+      <div class="small muted" style="margin-top:6px">
+        Дата отправки: {{ n.created_at.strftime('%d.%m.%Y %H:%M') }} (МСК) · Кому: {{ n.targets|map(attribute='role')|map('replace', 'teacher', 'Учителям')|map('replace', 'student', 'Ученикам')|map('replace', 'parent', 'Родителям')|join(', ') }}
+      </div>
+      <div style="margin-top:10px">
+        {% if n.id in pinned_notif_ids %}
+          <form method="post" action="/admin/notifications/unpin" style="display:inline">
+            <input type="hidden" name="notification_id" value="{{ n.id }}">
+            <button class="btn ghost sm">Открепить</button>
+          </form>
+        {% else %}
+          <form method="post" action="/admin/notifications/pin" style="display:inline">
+            <input type="hidden" name="notification_id" value="{{ n.id }}">
+            <button class="btn sm">Закрепить</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty"><div class="big">–</div>Уведомлений пока нет</div>
+  {% endif %}
+</div>
+{% endblock %}

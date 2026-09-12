@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Электронный дневник{% endblock %}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Электронный дневник<span>{{ user.full_name }}</span></div>
+    <nav>
+      {% if user.role == 'admin' %}
+        <a href="/admin" class="{{ 'active' if active == 'dashboard' }}">Дашборд</a>
+        <a href="/admin/users" class="{{ 'active' if active == 'users' }}">База данных</a>
+        <a href="/admin/notifications" class="{{ 'active' if active == 'notifications' }}">Рассылка уведомлений</a>
+        <a href="/admin/schedule" class="{{ 'active' if active == 'schedule' }}">Уроки</a>
+        <a href="/admin/bells" class="{{ 'active' if active == 'bells' }}">Расписание звонков</a>
+        <a href="/admin/holidays" class="{{ 'active' if active == 'holidays' }}">Каникулы</a>
+        <a href="/admin/grade_changes" class="{{ 'active' if active == 'grade_changes' }}">Заявки на изменение оценок</a>
+        <a href="/admin/settings" class="{{ 'active' if active == 'settings' }}">Настройки</a>
+      {% elif user.role == 'teacher' %}
+        <a href="/teacher" class="{{ 'active' if active == 'main' }}">Главная</a>
+        <a href="/teacher/today" class="{{ 'active' if active == 'today' }}">Уроки на сегодня</a>
+        <a href="/teacher/week" class="{{ 'active' if active == 'week' }}">Расписание на неделю</a>
+        <a href="/teacher/bells" class="{{ 'active' if active == 'bells' }}">Расписание звонков</a>
+        <a href="/teacher/students" class="{{ 'active' if active == 'students' }}">Мои ученики</a>
+        <a href="/teacher/parents" class="{{ 'active' if active == 'parents' }}">Родители</a>
+        <a href="/teacher/edit_grades" class="{{ 'active' if active == 'edit_grades' }}">Изменить оценку</a>
+      {% elif user.role in ('parent', 'student') %}
+        <a href="/{{ user.role }}" class="{{ 'active' if active == 'main' }}">Главная</a>
+        <a href="/{{ user.role }}/today" class="{{ 'active' if active == 'today' }}">Уроки на сегодня</a>
+        <a href="/{{ user.role }}/week" class="{{ 'active' if active == 'week' }}">Расписание уроков на неделю</a>
+        <a href="/{{ user.role }}/bells" class="{{ 'active' if active == 'bells' }}">Расписание звонков</a>
+        <a href="/{{ user.role }}/grades" class="{{ 'active' if active == 'grades' }}">Оценки</a>
+      {% endif %}
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="name">{{ user.full_name }}</div>
+        <div class="role">
+          {% if user.role == 'admin' %}Администратор
+          {% elif user.role == 'teacher' %}Учитель
+          {% elif user.role == 'parent' %}Родитель
+          {% elif user.role == 'student' %}Ученик{% endif %}
+        </div>
+      </div>
+      <form method="post" action="/logout"><button type="submit">Выйти</button></form>
+    </div>
+  </aside>
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<footer class="footer">Сделано Даниилом Леньковым(@blxckfvde) &lt;3 2026</footer>
+<script src="/static/js/app.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

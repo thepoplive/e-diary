@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Заявки на изменение оценок — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Заявки на изменение оценок</h1>
+<p class="page-sub">Изменения оценок, которым требуется подтверждение администратора (срок без подтверждения истёк).</p>
+
+<div class="card">
+  {% if rows %}
+  <table class="tbl">
+    <tr>
+      <th>Ученик</th><th>Предмет</th><th>Дата урока</th><th>Оценка</th><th>Комментарий учителя</th><th>Учитель</th><th>Заявка от</th><th></th>
+    </tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.student.full_name if r.student else '—' }}</td>
+      <td>{{ r.subject }}</td>
+      <td>{{ r.lesson.date.strftime('%d.%m.%Y') if r.lesson else '—' }}</td>
+      <td>{{ r.old_value }} → <strong>{{ r.new_value }}</strong></td>
+      <td>{{ r.comment }}</td>
+      <td>{{ r.teacher.full_name if r.teacher else '—' }}</td>
+      <td>{{ r.created_at.strftime('%d.%m.%Y %H:%M') if r.created_at else '—' }} (МСК)</td>
+      <td style="white-space:nowrap">
+        <form method="post" action="/admin/grade_changes/approve" style="display:inline">
+          <input type="hidden" name="change_id" value="{{ r.id }}">
+          <button class="btn success sm">Одобрить</button>
+        </form>
+        <form method="post" action="/admin/grade_changes/reject" style="display:inline">
+          <input type="hidden" name="change_id" value="{{ r.id }}">
+          <button class="btn danger sm">Отклонить</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty"><div class="big">✓</div>Нет заявок, ожидающих подтверждения</div>
+  {% endif %}
+</div>
+{% endblock %}

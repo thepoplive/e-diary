@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Добавить расписание — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Добавить расписание уроков</h1>
+<p class="page-sub">Выберите день и группу, затем добавляйте уроки по одному (нумерация присваивается автоматически).</p>
+
+<a class="btn ghost sm" href="/admin/schedule" style="margin-bottom:16px">← Назад к расписанию</a>
+
+<div class="card" style="max-width:860px">
+  <form method="post" action="/admin/schedule/add">
+    <div class="form-row">
+      <label class="f"><span class="lbl">День недели</span>
+        <select name="day">
+          {% for i in range(0, 7) %}<option value="{{ i }}">{{ days_ru[i] }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="f"><span class="lbl">Группа</span>
+        <select name="group_id" required>
+          {% for g in groups %}<option value="{{ g.id }}">{{ g.name }}</option>{% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <div id="schedule-rows"></div>
+    <button type="button" class="btn ghost" id="add-lesson">+ Добавить ещё один урок</button>
+
+    <div class="actions" style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px">
+      <a class="btn ghost" href="/admin/schedule">Отмена</a>
+      <button type="submit" class="btn success">Готово</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+window.__teacherOptions = '<option value="">— не выбран —</option>' +
+  {% for t in teachers %}'<option value="{{ t.id }}">{{ t.full_name }}</option>' + {% endfor %} '';
+document.addEventListener('DOMContentLoaded', function () {
+  var container = document.getElementById('schedule-rows');
+  var fn = window.add_schedule_row || function () {};
+  fn(container);
+});
+</script>
+{% endblock %}

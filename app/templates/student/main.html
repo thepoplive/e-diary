@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Главная — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Главная</h1>
+<p class="page-sub">Добро пожаловать, {{ user.full_name }}!</p>
+
+{% if user.group %}
+<div class="grid grid-2">
+  <div class="stat-card">
+    <div class="num">{{ today_count }}</div>
+    <div class="lbl">Уроков сегодня</div>
+    <a class="link small" href="/student/today">Перейти к урокам →</a>
+  </div>
+</div>
+{% else %}
+<div class="alert info">Вы не привязаны к группе. Обратитесь к администратору.</div>
+{% endif %}
+
+<div class="card" style="margin-top:20px">
+  <h3>Уведомления <span class="muted small">(дата и время — МСК, UTC+3)</span></h3>
+  {% include "_notifications.html" %}
+</div>
+{% endblock %}

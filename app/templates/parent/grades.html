@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Оценки — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Оценки</h1>
+<p class="page-sub">Оценки за неделю{% if child %} ({{ child.full_name }}){% endif %}</p>
+
+<div class="card" style="max-width:400px">
+  <form method="get" action="/parent/grades" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap">
+    <label class="f" style="margin:0; flex:1">
+      <span class="lbl">Дата (выбранная неделя)</span>
+      <input type="date" name="day" value="{{ ref.isoformat() if ref else '' }}">
+    </label>
+    <button class="btn" type="submit" style="margin-bottom:14px">Показать</button>
+  </form>
+</div>
+
+{% if days %}
+  {% for day in days %}
+  <div class="card">
+    <h3>{{ days_ru[day.date.weekday()] }} <span class="muted small">({{ day.date.strftime('%d.%m.%Y') }})</span></h3>
+    <table class="tbl">
+      <tr><th>Урок</th><th>Оценка</th><th>Присутствие</th></tr>
+      {% for r in day.rows %}
+      <tr>
+        <td>
+          <span class="badge blue">{{ r.entry.lesson_number }}</span>
+          {{ r.entry.subject }}
+          {% if r.entry.room %}<span class="muted small"> · каб. {{ r.entry.room }}</span>{% endif %}
+        </td>
+        <td>
+          {% if r.grade %}
+            <span class="grade-dot grade-{{ r.grade.value }}" data-comment="{{ r.grade.comment or '' }}" data-topic="Оценка: {{ r.grade.value }} — причина" style="cursor:pointer">{{ r.grade.value }}</span>
+          {% else %}
+            <span class="muted">—</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if r.attendance %}
+            <span class="att-badge badge {{ 'green' if r.attendance.status == 'present' else 'red' if r.attendance.status in ('skip','absent') else 'gray' }}"
+                  data-comment="{{ r.attendance.comment or '' }}" data-topic="Посещаемость: {{ attendance_labels[r.attendance.status] }}" style="cursor:pointer">
+              {{ attendance_labels[r.attendance.status] }}
+            </span>
+          {% else %}
+            <span class="muted">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endfor %}
+{% else %}
+<div class="empty"><div class="big">–</div>{% if child %}На эту неделю уроков нет{% else %}Ребёнок не привязан{% endif %}</div>
+{% endif %}
+
+<div class="modal-backdrop" id="info-modal" style="display:none">
+  <div class="modal">
+    <h3 id="info-title">Причина</h3>
+    <p id="info-text">—</p>
+    <div class="actions"><button class="btn ghost" data-modal-close>Закрыть</button></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('[data-comment]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var title = el.getAttribute('data-topic') || 'Причина';
+      var text = el.getAttribute('data-comment') || 'Комментарий отсутствует';
+      var existing = document.getElementById('info-modal-backdrop');
+      if (existing) existing.remove();
+      var div = document.createElement('div');
+      div.className = 'modal-backdrop open';
+      div.id = 'info-modal-backdrop';
+      div.innerHTML = '<div class="modal"><h3>' + title + '</h3><p>' + text + '</p><div class="actions"><button class="btn ghost" data-modal-close>Закрыть</button></div></div>';
+      document.body.appendChild(div);
+      div.querySelector('[data-modal-close]').addEventListener('click', function () { div.remove(); });
+      div.addEventListener('click', function (e) { if (e.target === div) div.remove(); });
+    });
+  });
+});
+</script>
+{% endblock %}

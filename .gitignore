@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.log
+
+# локальная БД (SQLite-фолбэк)
+college_diary.db
+
+# окружение и секреты
+.env
+.venv/
+venv/
+
+# системное
+Thumbs.db
+.DS_Store
+.idea/
+.vscode/

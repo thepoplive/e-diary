@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Уроки на сегодня — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Уроки на сегодня</h1>
+<p class="page-sub">Нажмите на урок, чтобы проставить посещаемость и оценки. Дата: {{ today.strftime('%d.%m.%Y') }} ({{ days_ru[today.weekday()] }})</p>
+
+{% if lessons %}
+  {% set bells = [] %}
+  {% for lesson in lessons %}
+  <a class="lesson-row" href="/teacher/lesson/{{ lesson.id }}" style="text-decoration:none; color:inherit">
+    <span class="num">Урок {{ lesson.schedule_entry.lesson_number }}</span>
+    <span class="subj"><strong>{{ lesson.schedule_entry.subject }}</strong></span>
+    <span class="muted">Группа: {{ lesson.schedule_entry.group.name }}</span>
+    <span class="muted">Кабинет: {{ lesson.schedule_entry.room or '—' }}</span>
+    <span class="btn ghost sm" style="pointer-events:none; min-width:110px">Изменить</span>
+  </a>
+  {% endfor %}
+{% else %}
+  <div class="empty"><div class="big">–</div>На сегодня уроков нет</div>
+{% endif %}
+{% endblock %}

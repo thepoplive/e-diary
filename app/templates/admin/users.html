@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">База данных</h1>
+<p class="page-sub">Учителя, ученики и родители. Можно менять логин, пароль, группу и привязки.</p>
+
+{% if request.query_params.get('error') %}<div class="alert error">{{ request.query_params.get('error') }}</div>{% endif %}
+
+<div class="card">
+  <h2>Создать нового пользователя</h2>
+  <div style="display:flex; gap:10px; flex-wrap:wrap">
+    <a class="btn" href="/admin/users/create?role=teacher">+ Учитель</a>
+    <a class="btn" href="/admin/users/create?role=student">+ Ученик</a>
+    <a class="btn" href="/admin/users/create?role=parent">+ Родитель</a>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Учителя <span class="muted small">({{ teachers|length }})</span></h2>
+  <table class="tbl">
+    <tr><th>ФИО</th><th>Телефон</th><th>Дата рождения</th><th>Группа</th><th>Логин</th><th>Доступ ко всем группам</th><th></th></tr>
+    {% for t in teachers %}
+    <tr>
+      <td>{{ t.full_name }}</td>
+      <td>{{ t.phone or '—' }}</td>
+      <td>{{ t.birth_date.strftime('%d.%m.%Y') if t.birth_date else '—' }}</td>
+      <td>{{ t.group.name if t.group else '—' }}</td>
+      <td>{{ t.login }}</td>
+      <td>{{ 'Да' if t.all_groups_access else 'Нет' }}</td>
+      <td><button class="btn ghost sm" data-edit-user
+        data-id="{{ t.id }}" data-login="{{ t.login }}" data-group="{{ t.group.name or '' }}"
+        data-role="{{ t.role }}" data-tc="{{ '1' if t.all_groups_access else '' }}"
+        data-child="{{ t.child_id or '' }}" data-parent="{{ t.parent_id or '' }}">Редактировать</button></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="muted" style="text-align:center">Учителей пока нет</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h2>Ученики <span class="muted small">({{ students|length }})</span></h2>
+  <table class="tbl">
+    <tr><th>ФИО</th><th>Телефон</th><th>Дата рождения</th><th>Группа</th><th>Логин</th><th>Родитель</th><th></th></tr>
+    {% for s in students %}
+    <tr>
+      <td>{{ s.full_name }}</td>
+      <td>{{ s.phone or '—' }}</td>
+      <td>{{ s.birth_date.strftime('%d.%m.%Y') if s.birth_date else '—' }}</td>
+      <td>{{ s.group.name if s.group else '—' }}</td>
+      <td>{{ s.login }}</td>
+      <td>{{ s.parent.full_name if s.parent else '—' }}</td>
+      <td><button class="btn ghost sm" data-edit-user
+        data-id="{{ s.id }}" data-login="{{ s.login }}" data-group="{{ s.group.name or '' }}"
+        data-role="{{ s.role }}" data-tc=""
+        data-child="" data-parent="{{ s.parent_id or '' }}">Редактировать</button></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="muted" style="text-align:center">Учеников пока нет</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h2>Родители <span class="muted small">({{ parents|length }})</span></h2>
+  <table class="tbl">
+    <tr><th>ФИО</th><th>Телефон</th><th>Дата рождения</th><th>Группа</th><th>Логин</th><th>Ребёнок</th><th></th></tr>
+    {% for p in parents %}
+    <tr>
+      <td>{{ p.full_name }}</td>
+      <td>{{ p.phone or '—' }}</td>
+      <td>{{ p.birth_date.strftime('%d.%m.%Y') if p.birth_date else '—' }}</td>
+      <td>{{ p.group.name if p.group else '—' }}</td>
+      <td>{{ p.login }}</td>
+      <td>{{ p.child.full_name if p.child else '—' }}</td>
+      <td><button class="btn ghost sm" data-edit-user
+        data-id="{{ p.id }}" data-login="{{ p.login }}" data-group="{{ p.group.name or '' }}"
+        data-role="{{ p.role }}" data-tc=""
+        data-child="{{ p.child_id or '' }}" data-parent="">Редактировать</button></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="muted" style="text-align:center">Родителей пока нет</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<!-- Modal редактирования -->
+<div class="modal-backdrop" id="edit-modal">
+  <div class="modal">
+    <h3>Редактировать пользователя</h3>
+    <form method="post" action="/admin/users/edit">
+      <input type="hidden" name="user_id" id="edit-id">
+      <label class="f"><span class="lbl">Логин</span><input type="text" name="login" id="edit-login" required></label>
+      <label class="f"><span class="lbl">Новый пароль</span>
+        <input type="password" name="password" id="edit-password" placeholder="Оставьте пустым, чтобы не менять">
+        <span class="hint">Если поле пустое — пароль останется прежним</span>
+      </label>
+      <label class="f"><span class="lbl">Группа</span>
+        <input type="text" name="group_name" id="edit-group" list="groups-datalist" placeholder="Введите название группы">
+        <datalist id="groups-datalist">
+          {% for g in groups %}<option value="{{ g.name }}">{% endfor %}
+        </datalist>
+      </label>
+      <div id="edit-teacher-block" class="hidden">
+        <label class="f" style="display:flex; align-items:center; gap:8px">
+          <input type="checkbox" name="all_groups_access" value="1" id="edit-tc" style="width:auto">
+          <span class="lbl" style="margin:0">Доступ к расписанию уроков для всех групп</span>
+        </label>
+      </div>
+      <div id="edit-parent-block" class="hidden">
+        <label class="f"><span class="lbl">Ребёнок (ученик)</span>
+          <select name="child_id" id="edit-child">
+            <option value="">— без изменений —</option>
+            {% for s in students %}<option value="{{ s.id }}">{{ s.full_name }} ({{ s.group.name if s.group else 'без группы' }})</option>{% endfor %}
+          </select>
+        </label>
+      </div>
+      <div id="edit-student-block" class="hidden">
+        <label class="f"><span class="lbl">Привязать родителя</span>
+          <select name="child_id" id="edit-student-parent">
+            <option value="">— не привязывать —</option>
+            {% for pr in parents %}<option value="{{ pr.id }}">{{ pr.full_name }}</option>{% endfor %}
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn ghost" data-modal-close>Отмена</button>
+        <button type="submit" class="btn success">Сохранить</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('[data-edit-user]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var d = btn.dataset;
+      document.getElementById('edit-id').value = d.id;
+      document.getElementById('edit-login').value = d.login;
+      document.getElementById('edit-password').value = '';
+      document.getElementById('edit-group').value = d.group;
+      var role = d.role;
+      document.getElementById('edit-teacher-block').classList.toggle('hidden', role !== 'teacher');
+      document.getElementById('edit-parent-block').classList.toggle('hidden', role !== 'parent');
+      document.getElementById('edit-student-block').classList.toggle('hidden', role !== 'student');
+      document.getElementById('edit-tc').checked = d.tc === '1';
+      document.getElementById('edit-child').value = d.child;
+      document.getElementById('edit-student-parent').value = d.parent;
+      document.getElementById('edit-modal').classList.add('open');
+    });
+  });
+});
+</script>
+{% endblock %}

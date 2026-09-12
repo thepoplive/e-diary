@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Расписание уроков — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Расписание уроков</h1>
+<p class="page-sub">Выберите день недели, чтобы увидеть расписание по всем группам.</p>
+
+<div class="card" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap">
+  <form method="get" action="/admin/schedule" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap">
+    <label class="f" style="margin:0; min-width:200px">
+      <span class="lbl">День недели</span>
+      <select name="day" onchange="this.form.submit()">
+        {% for i in days %}
+        <option value="{{ i }}" {{ 'selected' if i == day }}>{{ days_ru[i] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <noscript><button class="btn">Показать</button></noscript>
+  </form>
+  <a class="btn" href="/admin/schedule/add">+ Добавить расписание уроков</a>
+</div>
+
+{% if table %}
+  {% for row in table %}
+  <div class="group-block">
+    <div class="group-label">{{ row.group.name }}</div>
+    <div class="card" style="padding:10px">
+      {% if row.entries %}
+        {% for e in row.entries %}
+        <div class="sched-entry">
+          <span class="sched-num">{{ e.lesson_number }}.</span>
+          <span style="flex:1"><strong>{{ e.subject }}</strong>
+            {% if e.room %}<span class="muted"> · кабинет {{ e.room }}</span>{% endif %}
+          </span>
+          <span class="muted">{{ e.teacher.full_name if e.teacher else '—' }}</span>
+          <button class="btn ghost sm" data-edit-entry
+            data-id="{{ e.id }}" data-subject="{{ e.subject }}"
+            data-teacher="{{ e.teacher_id or '' }}" data-room="{{ e.room or '' }}">✎</button>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="muted" style="padding:10px; text-align:center">В этот день у группы нет уроков</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="empty"><div class="big">–</div>Групп пока не создано</div>
+{% endif %}
+
+<div class="modal-backdrop" id="edit-entry-modal">
+  <div class="modal">
+    <h3>Изменить урок</h3>
+    <form method="post" action="/admin/schedule/edit">
+      <input type="hidden" name="entry_id" id="entry-id">
+      <label class="f"><span class="lbl">Название урока</span>
+        <input type="text" name="subject" id="entry-subject" required>
+      </label>
+      <label class="f"><span class="lbl">Учитель</span>
+        <select name="teacher_id" id="entry-teacher">
+          <option value="">— не выбран —</option>
+          {% for t in teachers %}<option value="{{ t.id }}">{{ t.full_name }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="f"><span class="lbl">Кабинет</span>
+        <input type="text" name="room" id="entry-room" placeholder="12">
+      </label>
+      <div class="actions">
+        <button type="button" class="btn ghost" data-modal-close>Отмена</button>
+        <button type="submit" class="btn success">Сохранить</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('[data-edit-entry]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var d = btn.dataset;
+      document.getElementById('entry-id').value = d.id;
+      document.getElementById('entry-subject').value = d.subject;
+      document.getElementById('entry-room').value = d.room;
+      document.getElementById('entry-teacher').value = d.teacher;
+      document.getElementById('edit-entry-modal').classList.add('open');
+    });
+  });
+});
+</script>
+{% endblock %}

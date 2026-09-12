@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Изменение оценки — Электронный дневник{% endblock %}
+{% block content %}
+<a class="btn ghost sm" href="/teacher/edit_grades?day={{ lesson.date.isoformat() }}" style="margin-bottom:14px">← Назад к урокам</a>
+
+<h1 class="page-title">{{ lesson.schedule_entry.subject }}</h1>
+<p class="page-sub">
+  Группа: <strong>{{ lesson.schedule_entry.group.name }}</strong> ·
+  Кабинет: {{ lesson.schedule_entry.room or '—' }} ·
+  Дата: {{ lesson.date.strftime('%d.%m.%Y') }} ·
+  Дней с урока: {{ age }}
+</p>
+
+{% if not can_edit and not can_request %}
+<div class="alert error">Срок изменения оценки истёк (прошло {{ age }} дней). Оценки и посещаемость изменить нельзя.</div>
+{% elif not can_edit %}
+<div class="alert info">Срок самостоятельного изменения оценки истёк (прошло {{ age }} дней). Изменения требуют подтверждения администратора. Введённый комментарий будет передан на рассмотрение.</div>
+{% else %}
+<div class="alert success">Вы можете изменять оценки без подтверждения ( срок ещё {{ settings.grade_edit_days - age }} дн.). Обязательно введите комментарий.</div>
+{% endif %}
+
+<div class="card">
+  {% if rows %}
+  <div class="lesson-grid-head">
+    <span>Ученик</span><span>Присутствие</span><span>Оценка</span><span>Комментарий</span><span></span>
+  </div>
+  {% for r in rows %}
+  <form method="post" action="/teacher/edit_grades/lesson/{{ lesson.id }}" class="lesson-grid att-grade-row">
+    <input type="hidden" name="student_ids" value="{{ r.student.id }}">
+    <div>
+      <strong>{{ r.student.full_name }}</strong>
+      <div class="small muted">
+        {% if r.attendance %}Текущ.: <b>{{ attendance_labels[r.attendance.status] }}</b>{% if r.attendance.comment %} — {{ r.attendance.comment }}{% endif %}{% endif %}
+        {% if r.grade %}{% if r.attendance %}<br>{% endif %}Оценка: <b>{{ r.grade.value }}</b>{{ ' (замечание)' if r.grade.value == '!' }}{% if r.grade.comment %} — {{ r.grade.comment }}{% endif %}{% endif %}
+        {% if not r.attendance and not r.grade %}не заполнено{% endif %}
+      </div>
+    </div>
+    <div>
+      <select name="attendance" class="att-select">
+        <option value="">—</option>
+        {% for val, lbl in attendance_labels.items() %}
+        <option value="{{ val }}" {{ 'selected' if r.attendance and r.attendance.status == val }}>{{ lbl }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <select name="grades" class="grade-select">
+        <option value="">—</option>
+        {% for val, lbl in grade_labels.items() %}
+        <option value="{{ val }}" {{ 'selected' if r.grade and r.grade.value == val }}>{{ lbl }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <input type="text" name="comments" class="cmt-input hidden" placeholder="Пример: принес(ла) справку">
+    </div>
+    <div>
+      <button class="btn sm row-save hidden" type="submit">Сохранить</button>
+    </div>
+  </form>
+  {% endfor %}
+  {% else %}
+  <div class="empty"><div class="big">–</div>В группе нет учеников</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.lesson-grid { display: grid; grid-template-columns: 1.8fr 1.2fr 1fr 1.5fr 130px; gap: 12px; align-items: center; padding: 12px 8px; border-bottom: 1px solid var(--border); }
+.lesson-grid:last-child { border-bottom: none; }
+.lesson-grid-head { display: grid; grid-template-columns: 1.8fr 1.2fr 1fr 1.5fr 130px; gap: 12px; padding: 8px; font-weight: 600; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid var(--border); }
+@media (max-width: 900px) {
+  .lesson-grid, .lesson-grid-head { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}

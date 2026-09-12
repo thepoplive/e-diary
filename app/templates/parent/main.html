@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Главная — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Главная</h1>
+<p class="page-sub">Добро пожаловать, {{ user.full_name }}!</p>
+
+{% if child %}
+<div class="grid grid-2">
+  <div class="stat-card">
+    <div class="num">{{ today_count }}</div>
+    <div class="lbl">Уроков у {{ child.full_name }} сегодня</div>
+    <a class="link small" href="/parent/today">Посмотреть расписание →</a>
+  </div>
+</div>
+{% else %}
+<div class="alert info">К аккаунту не привязан ребёнок. Обратитесь к администратору.</div>
+{% endif %}
+
+<div class="card" style="margin-top:20px">
+  <h3>Уведомления <span class="muted small">(дата и время — МСК, UTC+3)</span></h3>
+  {% include "_notifications.html" %}
+</div>
+{% endblock %}

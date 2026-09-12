@@ -1,0 +1,26 @@
+{% if notifications %}
+  {% for item in notifications %}
+  {% set n = item.n %}
+  <div class="notif {{ 'pinned' if item.pinned }}">
+    <div class="head">
+      <span class="topic">
+        {% if item.pinned %}<span class="pin-tag">Закреплено</span>{% endif %}
+        {{ n.topic }}
+      </span>
+      <span class="time">{{ n.created_at.strftime('%d.%m.%Y %H:%M') }} (МСК)</span>
+    </div>
+    <div class="notif-body-wrap">
+      {% if n.message|length > 64 %}
+        <div class="body msg-short">{{ n.message[:64] }}…</div>
+        <div class="body msg-full hidden">{{ n.message }}</div>
+        <button class="link small js-expand">Раскрыть полностью</button>
+        <button class="link small msg-collapse hidden">Скрыть</button>
+      {% else %}
+        <div class="body">{{ n.message }}</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="empty"><div class="big">–</div>Уведомлений пока нет</div>
+{% endif %}

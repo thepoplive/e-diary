@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Аккаунт создан</h1>
+
+<div class="modal-backdrop open">
+  <div class="modal" style="text-align:center">
+    <h3>Аккаунт создан</h3>
+    <p class="muted">Данные для входа нового пользователя:</p>
+    <div class="card" style="text-align:left; background:#f8fafc">
+      <div><strong>{{ created.full_name }}</strong></div>
+      <div class="muted">Логин: <code>{{ created.login }}</code></div>
+      <div class="muted">Пароль: <code>{{ password }}</code></div>
+    </div>
+    <div class="actions" style="justify-content:center; flex-wrap:wrap">
+      <button class="btn success" data-copy="{{ created.full_name }}&#10;{{ created.login }}&#10;{{ password }}">Скопировать данные</button>
+      <a class="btn ghost" href="/admin/users">Закрыть</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

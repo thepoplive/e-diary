@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Каникулы — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Каникулы</h1>
+<p class="page-sub">Даты начала и окончания каникул.</p>
+
+{% if request.query_params.get('error') %}<div class="alert error">{{ request.query_params.get('error') }}</div>{% endif %}
+
+<div class="card">
+  <h3>Добавить каникулы</h3>
+  <form method="post" action="/admin/holidays/add" class="form-row" style="align-items:flex-end">
+    <label class="f"><span class="lbl">Начало</span><input type="date" name="start_date" required></label>
+    <label class="f"><span class="lbl">Окончание</span><input type="date" name="end_date" required></label>
+    <button class="btn success" type="submit">Добавить</button>
+  </form>
+</div>
+
+<div class="card">
+  <table class="tbl">
+    <tr><th>№</th><th>Начало</th><th>Окончание</th><th></th></tr>
+    {% for h in holidays %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ h.start_date.strftime('%d.%m.%Y') }}</td>
+      <td>{{ h.end_date.strftime('%d.%m.%Y') }}</td>
+      <td><button class="btn ghost sm" data-edit-holiday
+        data-id="{{ h.id }}" data-start="{{ h.start_date.isoformat() }}" data-end="{{ h.end_date.isoformat() }}">✎</button></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="muted" style="text-align:center">Каникулы ещё не добавлены</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="modal-backdrop" id="edit-holiday-modal">
+  <div class="modal">
+    <h3>Изменить каникулы</h3>
+    <form method="post" action="/admin/holidays/edit">
+      <input type="hidden" name="holiday_id" id="holiday-id">
+      <div class="form-row">
+        <label class="f"><span class="lbl">Начало</span><input type="date" name="start_date" id="holiday-start" required></label>
+        <label class="f"><span class="lbl">Окончание</span><input type="date" name="end_date" id="holiday-end" required></label>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn ghost" data-modal-close>Отмена</button>
+        <button type="submit" class="btn success">Сохранить</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('[data-edit-holiday]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var d = btn.dataset;
+      document.getElementById('holiday-id').value = d.id;
+      document.getElementById('holiday-start').value = d.start;
+      document.getElementById('holiday-end').value = d.end;
+      document.getElementById('edit-holiday-modal').classList.add('open');
+    });
+  });
+});
+</script>
+{% endblock %}

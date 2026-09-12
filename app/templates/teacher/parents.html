@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Родители — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Родители</h1>
+<p class="page-sub">Родители учеников вашей группы ({{ user.group.name if user.group else 'не определена' }}).</p>
+
+{% if parents %}
+<table class="tbl">
+  <tr><th>ФИО</th><th>Телефон</th><th>Дата рождения</th><th>Ребёнок</th></tr>
+  {% for p in parents %}
+  <tr>
+    <td>{{ p.full_name }}</td>
+    <td>{{ p.phone or '—' }}</td>
+    <td>{{ p.birth_date.strftime('%d.%m.%Y') if p.birth_date else '—' }}</td>
+    <td>{{ p.child.full_name if p.child else '—' }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="empty"><div class="big">–</div>{% if user.group %}В группе пока нет родителей{% else %}Группа ещё не назначена{% endif %}</div>
+{% endif %}
+{% endblock %}

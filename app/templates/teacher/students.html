@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Мои ученики — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Мои ученики</h1>
+<p class="page-sub">Статистика учеников в вашей группе ({{ user.group.name if user.group else 'не определена' }}).</p>
+
+{% if rows %}
+<table class="tbl">
+  <tr>
+    <th>ФИО</th>
+    <th>Телефон</th>
+    <th>Дата рождения</th>
+    <th>Посещено уроков</th>
+    <th>Прогулы (уваж.)</th>
+    <th>Болезнь</th>
+    <th>Прогулы (неуваж.)</th>
+    <th>Замечания</th>
+  </tr>
+  {% for r in rows %}
+  <tr>
+    <td>{{ r.student.full_name }}</td>
+    <td>{{ r.student.phone or '—' }}</td>
+    <td>{{ r.student.birth_date.strftime('%d.%m.%Y') if r.student.birth_date else '—' }}</td>
+    <td><span class="badge green">{{ r.stats.attended }}</span></td>
+    <td><span class="badge amber">{{ r.stats.excused }}</span></td>
+    <td><span class="badge gray">{{ r.stats.sick }}</span></td>
+    <td><span class="badge red">{{ r.stats.unexcused }}</span></td>
+    <td><span class="badge red">{{ r.stats.remarks }}</span></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="empty"><div class="big">–</div>{% if user.group %}В группе пока нет учеников{% else %}Группа ещё не назначена{% endif %}</div>
+{% endif %}
+{% endblock %}

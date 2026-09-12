@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Расписание звонков — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Расписание звонков</h1>
+<p class="page-sub">Время начала и окончания каждого урока.</p>
+<div class="card">
+  <table class="tbl">
+    <tr><th>Номер урока</th><th>Начало</th><th>Окончание</th></tr>
+    {% for b in bells %}
+    <tr><td><strong>{{ b.lesson_number }}</strong></td><td>{{ b.start_time }}</td><td>{{ b.end_time }}</td></tr>
+    {% else %}
+    <tr><td colspan="3" class="muted" style="text-align:center">Расписание звонков не настроено</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Уроки на сегодня — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Уроки на сегодня</h1>
+<p class="page-sub">{{ user.group.name if user.group else 'Группа не назначена' }} · {{ today if today else '' }}</p>
+
+{% if rows %}
+<table class="tbl">
+  <tr><th>№ урока</th><th>Предмет</th><th>Кабинет</th><th>Присутствие</th><th>Оценка</th></tr>
+  {% for r in rows %}
+  <tr>
+    <td><span class="badge blue">{{ r.entry.lesson_number }}</span></td>
+    <td>{{ r.entry.subject }}</td>
+    <td>{{ r.entry.room or '—' }}</td>
+    <td>
+      {% if r.attendance %}
+        <span class="att-badge badge {{ 'green' if r.attendance.status == 'present' else 'red' if r.attendance.status in ('skip','absent') else 'gray' }}"
+              data-comment="{{ r.attendance.comment or '' }}" data-topic="Посещаемость: {{ attendance_labels[r.attendance.status] }}">
+          {{ attendance_labels[r.attendance.status] }}
+        </span>
+      {% else %}
+        <span class="muted small">—</span>
+      {% endif %}
+    </td>
+    <td>
+      {% if r.grade %}
+        <span class="grade-dot grade-{{ r.grade.value }}"
+              data-comment="{{ r.grade.comment or '' }}" data-topic="Оценка: {{ r.grade.value }}{{ ' (замечание)' if r.grade.value == '!' }}">
+          {{ r.grade.value }}
+        </span>
+      {% else %}
+        <span class="muted">—</span>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="empty"><div class="big">–</div>{% if user.group %}На сегодня уроков нет{% else %}Группа не назначена{% endif %}</div>
+{% endif %}
+
+<div class="modal-backdrop" id="info-modal" style="display:none">
+  <div class="modal">
+    <h3 id="info-title">Причина</h3>
+    <p id="info-text">—</p>
+    <div class="actions"><button class="btn ghost" data-modal-close>Закрыть</button></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('[data-comment]').forEach(function (el) {
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', function () {
+      var title = el.getAttribute('data-topic') || 'Причина';
+      var text = el.getAttribute('data-comment') || 'Комментарий отсутствует';
+      var existing = document.getElementById('info-modal-backdrop');
+      if (existing) existing.remove();
+      var div = document.createElement('div');
+      div.className = 'modal-backdrop open';
+      div.id = 'info-modal-backdrop';
+      div.innerHTML = '<div class="modal"><h3>' + title + '</h3><p>' + text + '</p><div class="actions"><button class="btn ghost" data-modal-close>Закрыть</button></div></div>';
+      document.body.appendChild(div);
+      div.querySelector('[data-modal-close]').addEventListener('click', function () { div.remove(); });
+      div.addEventListener('click', function (e) { if (e.target === div) div.remove(); });
+    });
+  });
+});
+</script>
+{% endblock %}

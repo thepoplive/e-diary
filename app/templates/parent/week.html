@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Расписание на неделю — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Расписание уроков на неделю</h1>
+<p class="page-sub">{% if child %}Расписание для {{ child.full_name }}{% else %}Ребёнок не привязан{% endif %}</p>
+
+{% if days %}
+  {% for day in days %}
+  <div class="card">
+    <h3 style="margin-bottom:10px">{{ days_ru[day.date.weekday()] }} <span class="muted small">({{ day.date.strftime('%d.%m.%Y') }})</span></h3>
+    {% for r in day.rows %}
+    <div class="sched-entry">
+      <span class="sched-num">{{ r.entry.lesson_number }}.</span>
+      <span style="flex:1"><strong>{{ r.entry.subject }}</strong>
+        {% if r.entry.room %}<span class="muted"> · кабинет {{ r.entry.room }}</span>{% endif %}
+      </span>
+      {% if r.grade %}
+        <span class="grade-dot grade-{{ r.grade.value }}">{{ r.grade.value }}</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+{% else %}
+<div class="empty"><div class="big">–</div>{% if child %}На эту неделю уроков нет{% else %}Ребёнок не привязан{% endif %}</div>
+{% endif %}
+{% endblock %}

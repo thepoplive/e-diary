@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Расписание звонков — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Расписание звонков</h1>
+<p class="page-sub">Измените расписание звонков: номер урока и время (начало — конец).</p>
+
+<div class="card" style="max-width:640px">
+  <form method="post" action="/admin/bells">
+    <div id="bell-rows">
+      {% for b in bells %}
+      <div class="bell-input-row form-row">
+        <label class="f" style="flex:0.5"><span class="lbl">Номер урока</span><input type="number" name="lesson_number" min="1" value="{{ b.lesson_number }}"></label>
+        <label class="f"><span class="lbl">Начало</span><input type="time" name="start_time" value="{{ b.start_time }}"></label>
+        <label class="f"><span class="lbl">Конец</span><input type="time" name="end_time" value="{{ b.end_time }}"></label>
+        <button type="button" class="btn ghost sm remove-row" style="align-self:flex-end">✕</button>
+      </div>
+      {% endfor %}
+    </div>
+    <button type="button" class="btn ghost" id="add-bell" style="margin-top:6px">+ Добавить ещё один урок</button>
+    <div class="actions" style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px">
+      <a class="btn ghost" href="/admin">Отмена</a>
+      <button class="btn success" type="submit">Сохранить</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Главная — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Главная</h1>
+<p class="page-sub">Добро пожаловать, {{ user.full_name }}!</p>
+
+<div class="grid grid-2">
+  <div class="stat-card">
+    <div class="num">{{ today_count }}</div>
+    <div class="lbl">Уроков сегодня</div>
+    <a class="link small" href="/teacher/today">Перейти к урокам →</a>
+  </div>
+</div>
+
+<div class="card" style="margin-top:20px">
+  <h3>Уведомления <span class="muted small">(дата и время отправки — по МСК, UTC+3)</span></h3>
+  {% include "_notifications.html" %}
+</div>
+{% endblock %}

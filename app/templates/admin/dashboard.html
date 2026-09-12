@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Дашборд</h1>
+<p class="page-sub">Сводка по электронному дневнику</p>
+
+<div class="grid grid-4">
+  <div class="stat-card"><div class="num">{{ stats.teachers }}</div><div class="lbl">Учителя</div></div>
+  <div class="stat-card"><div class="num">{{ stats.students }}</div><div class="lbl">Ученики</div></div>
+  <div class="stat-card"><div class="num">{{ stats.parents }}</div><div class="lbl">Родители</div></div>
+  <div class="stat-card"><div class="num">{{ stats.groups }}</div><div class="lbl">Группы</div></div>
+  <div class="stat-card"><div class="num">{{ stats.grades }}</div><div class="lbl">Оценок поставлено</div></div>
+  <div class="stat-card"><div class="num">{{ stats.remarks }}</div><div class="lbl">Замечания</div></div>
+</div>
+
+<div class="card" style="margin-top:20px">
+  <h3>Быстрые действия</h3>
+  <div style="display:flex; gap:10px; flex-wrap:wrap">
+    <a class="btn" href="/admin/users/create?role=teacher">Создать учителя</a>
+    <a class="btn" href="/admin/users/create?role=student">Создать ученика</a>
+    <a class="btn" href="/admin/users/create?role=parent">Создать родителя</a>
+    <a class="btn ghost" href="/admin/notifications">Отправить уведомление</a>
+    <a class="btn ghost" href="/admin/schedule">Расписание уроков</a>
+  </div>
+</div>
+{% endblock %}

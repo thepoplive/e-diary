@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Настройки — Электронный дневник{% endblock %}
+{% block content %}
+<h1 class="page-title">Настройки</h1>
+<p class="page-sub">Сроки, в течение которых учитель может изменять оценки.</p>
+
+<div class="card" style="max-width:640px">
+  <form method="post" action="/admin/settings/save">
+    <label class="f">
+      <span class="lbl">В течение какого срока можно изменить оценку без подтверждения администратора</span>
+      <select name="grade_edit_days">
+        {% for d in [1,3,7,14,31,60,90] %}
+        <option value="{{ d }}" {{ 'selected' if settings.grade_edit_days == d }}>{{ d }} {{ {'1':'день','3':'дня','7':'дней','14':'дней','31':'день','60':'дней','90':'дней'}[d|string] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label class="f">
+      <span class="lbl">После завершения первого срока — в течение какого срока можно изменить оценку с подтверждением администратора</span>
+      <select name="grade_admin_edit_days">
+        {% for d in [1,3,7,14,31,60,90] %}
+        <option value="{{ d }}" {{ 'selected' if settings.grade_admin_edit_days == d }}>{{ d }} {{ {'1':'день','3':'дня','7':'дней','14':'дней','31':'день','60':'дней','90':'дней'}[d|string] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <div class="hint" style="margin-bottom:10px">
+      В сумме срок изменения оценки не может превышать 181 день — после этого оценку изменить нельзя.
+    </div>
+    <button class="btn success" type="submit">Сохранить</button>
+  </form>
+</div>
+{% endblock %}
